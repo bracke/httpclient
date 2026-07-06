@@ -1,0 +1,25 @@
+with "../httpclient.gpr";
+with "../../zlib/zlib.gpr";
+with "../../project_tools/project_tools.gpr";
+project Tools is
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use
+     ("check_all.adb",
+      "check_aunit_suite.adb",
+      "check_release_surface.adb",
+      "check_git_smart_http_release.adb",
+      "check_security_corpus.adb",
+      "h2_wire_probe.adb",
+      "run_aunit_coverage.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnata", "-gnatW8", "-gnatwa");
+   end Compiler;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-lssl", "-lcrypto");
+   end Linker;
+end Tools;

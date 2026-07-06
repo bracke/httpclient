@@ -1,0 +1,61 @@
+name = "examples"
+description = "Examples of httpclient use"
+version = "1.0.0"
+
+authors = ["Bent Bracke"]
+maintainers = ["Bent Bracke <bent@bracke.dk>"]
+maintainers-logins = ["bracke"]
+licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
+website = ""
+tags = []
+
+executables = [
+      "alt_svc_parse.adb",
+      "async_submit.adb",
+      "basic_auth.adb",
+      "bearer_auth.adb",
+      "cache_config.adb",
+      "client_certificate_config.adb",
+      "connection_pool_policy.adb",
+      "cookie_session.adb",
+      "decompression_config.adb",
+      "diagnostics_observer.adb",
+      "digest_auth.adb",
+      "enable_http2.adb",
+      "enable_http3_experimental.adb",
+      "encrypted_cache_config.adb",
+      "http_proxy_config.adb",
+      "https_svcb_record.adb",
+      "manual_request.adb",
+      "multipart_upload.adb",
+      "pac_wpad_config.adb",
+      "persistent_cache_config.adb",
+      "protocol_discovery_config.adb",
+      "redirect_client.adb",
+      "retry_policy.adb",
+      "simple_get.adb",
+      "socks_proxy_config.adb",
+      "stabilized_defaults.adb",
+      "status_categories.adb",
+      "git_info_refs_stream.adb",
+      "git_info_refs_https_proxy_stream.adb",
+      "git_info_refs_https_socks_stream.adb",
+      "git_info_refs_http3_buffered.adb",
+      "git_info_refs_http2_buffered.adb",
+      "git_upload_pack_http2_stream.adb",
+      "git_upload_pack_stream.adb",
+      "git_receive_pack_fixed_upload.adb",
+      "git_receive_pack_chunked_upload.adb",
+      "git_receive_pack_chunked_upload_trailers.adb",
+      "git_info_refs_http3_stream.adb",
+      "streaming_download.adb",
+      "streaming_upload.adb"]
+
+[[depends-on]]
+gnat_native = "=15.2.1"
+
+[[depends-on]]
+httpclient = "*"
+
+[[pins]]
+httpclient = { path='..' }

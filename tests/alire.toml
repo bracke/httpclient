@@ -1,0 +1,24 @@
+name = "tests"
+description = "test suite for httpclient"
+version = "1.0"
+
+authors = ["Bent Bracke"]
+maintainers = ["Bent Bracke <bent@bracke.dk>"]
+maintainers-logins = ["bracke"]
+licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
+website = ""
+tags = []
+
+executables = ["tests"]
+
+[[depends-on]]
+gnat_native = "=15.2.1"
+
+[[depends-on]]
+httpclient = "*"
+
+[[pins]]
+httpclient = { path='..' }
+
+[[depends-on]]
+aunit = "^26.0.0"

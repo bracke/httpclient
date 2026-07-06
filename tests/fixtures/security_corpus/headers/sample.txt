@@ -1,0 +1,3 @@
+X-Test: value
+Bad\r\nHeader: rejected
+Content-Length-conflict

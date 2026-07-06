@@ -1,0 +1,3 @@
+test-ca-only
+hostname-mismatch
+certificate-validation-required

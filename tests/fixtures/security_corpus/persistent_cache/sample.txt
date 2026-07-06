@@ -1,0 +1,3 @@
+metadata.tmp
+body.tmp
+atomic-publication-failure

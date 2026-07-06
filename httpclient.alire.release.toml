@@ -1,0 +1,16 @@
+name = "httpclient"
+description = "HTTP/HTTPS client library"
+version = "1.0.0"
+licenses = "MIT"
+
+authors = ["Bent Bracke"]
+maintainers = ["Bent Bracke <bent@bracke.dk>"]
+maintainers-logins = ["bracke"]
+
+tags = ["http", "https", "client", "tls", "http2", "cache", "async"]
+
+[[depends-on]]
+gnat_native = "=15.2.1"
+
+[[depends-on]]
+zlib = "*"

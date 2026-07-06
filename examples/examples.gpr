@@ -1,0 +1,84 @@
+with "config/examples_config.gpr";
+with "../httpclient.gpr";
+project Examples is
+
+   for Source_Dirs use ("src/", "config/");
+   for Object_Dir use "obj/" & Examples_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "bin";
+   for Main use
+     ("alt_svc_parse.adb",
+      "async_submit.adb",
+      "basic_auth.adb",
+      "bearer_auth.adb",
+      "cache_config.adb",
+      "client_certificate_config.adb",
+      "connection_pool_policy.adb",
+      "cookie_session.adb",
+      "decompression_config.adb",
+      "diagnostics_observer.adb",
+      "download_to_file.adb",
+      "digest_auth.adb",
+      "enable_http2.adb",
+      "enable_http3_experimental.adb",
+      "http3_force_no_backend.adb",
+      "http3_prefer_with_fallback.adb",
+      "encrypted_cache_config.adb",
+      "http_proxy_config.adb",
+      "https_svcb_record.adb",
+      "manual_request.adb",
+      "multipart_upload.adb",
+      "pac_wpad_config.adb",
+      "persistent_cache_config.adb",
+      "protocol_discovery_config.adb",
+      "redirect_client.adb",
+      "retry_policy.adb",
+      "simple_get.adb",
+      "socks_proxy_config.adb",
+      "stabilized_defaults.adb",
+      "status_categories.adb",
+      "git_info_refs_stream.adb",
+      "git_info_refs_https_proxy_stream.adb",
+      "git_info_refs_https_socks_stream.adb",
+      "git_info_refs_http3_buffered.adb",
+      "git_info_refs_http2_buffered.adb",
+      "git_upload_pack_http2_stream.adb",
+      "git_upload_pack_stream.adb",
+      "git_receive_pack_fixed_upload.adb",
+      "git_receive_pack_chunked_upload.adb",
+      "git_receive_pack_chunked_upload_trailers.adb",
+      "git_info_refs_http3_stream.adb",
+      "streaming_download.adb",
+      "streaming_upload.adb",
+      "streaming_get_with_cancellation.adb",
+      "git_info_refs_streaming_get.adb",
+      "git_upload_pack_post_buffered.adb",
+      "git_chunked_upload_with_trailers.adb",
+      "git_receive_pack_expect_continue.adb",
+      "git_https_custom_ca.adb",
+      "git_https_proxy_connect.adb",
+      "git_socks5_https.adb",
+      "git_streaming_decompression.adb",
+      "git_http2_streaming_fetch_shape.adb",
+      "git_redirect_policy.adb",
+      "git_retry_policy.adb",
+      "git_streaming_with_timeout_and_cancellation.adb",
+      "git_binary_safe_transport_shape.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022","-gnatyM120","-gnatX", "-gnata");
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --  Symbolic traceback
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-lssl", "-lcrypto");
+   end Linker;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+end Examples;

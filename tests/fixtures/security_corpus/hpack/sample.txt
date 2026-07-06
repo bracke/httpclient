@@ -1,0 +1,3 @@
+indexed-header-valid
+invalid-huffman-symbol
+dynamic-table-bound

@@ -1,0 +1,3 @@
+CONNECT example.test:443
+Proxy-Authorization: <redacted>
+origin-headers-after-tunnel

@@ -1,0 +1,21 @@
+with "../../httpclient.gpr";
+
+project API_Stability is
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "bin";
+   for Main use ("api_stability_compile.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-gnatyM120", "-gnatX", "-gnata");
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es");
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-lssl", "-lcrypto");
+   end Linker;
+end API_Stability;

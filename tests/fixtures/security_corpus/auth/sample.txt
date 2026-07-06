@@ -1,0 +1,3 @@
+Authorization: Bearer <redacted>
+Proxy-Authorization: Basic <redacted>
+CRLF-injection-rejected

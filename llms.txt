@@ -1,0 +1,120 @@
+# http_client
+
+> Ada 2022 HTTP/HTTPS client library with explicit configuration, conservative
+> security defaults, deterministic offline tests, and documented stable versus
+> experimental package boundaries.
+
+## Identity
+
+- Alire crate: `httpclient`
+- Ada root package: `Http_Client`
+- Main project: `httpclient.gpr`
+- Primary high-level API: `Http_Client.Clients`
+- Public package map: `docs/PUBLIC_PACKAGES.md`
+- Stable API contract: `docs/STABLE_API_CONTRACT.md`
+- AI usage guide: `docs/AI_USAGE_GUIDE.md`
+- Agent notes: `AGENTS.md`
+
+## What It Provides
+
+Stable user-facing areas include URI parsing, headers, requests, responses,
+status values, HTTP/1.1 execution, HTTPS/TLS configuration, high-level clients,
+redirects, retries, cookies, decompression, streaming, uploads, multipart,
+proxies, SOCKS5, authentication helpers, diagnostics, caches, bounded async,
+HTTP/2 configuration/execution support, and explicit protocol-discovery helpers.
+
+HTTP/3 and QUIC packages are experimental boundaries. Production HTTP/3 request
+execution requires an explicitly configured supported QUIC backend; otherwise the
+library must fail with deterministic unsupported statuses or fall back only where
+configured before unsafe request transmission.
+
+## First Packages To Use
+
+```ada
+with Http_Client.Clients;
+with Http_Client.Errors;
+```
+
+For lower-level request construction:
+
+```ada
+with Http_Client.Headers;
+with Http_Client.Requests;
+with Http_Client.Responses;
+with Http_Client.Types;
+with Http_Client.URI;
+```
+
+For optional behavior, prefer the documented configuration packages such as
+`Http_Client.Retry`, `Http_Client.Proxies`, `Http_Client.Proxies.SOCKS`,
+`Http_Client.Diagnostics`, `Http_Client.Cache`, `Http_Client.Cache.Persistent`,
+`Http_Client.Decompression`, and `Http_Client.Protocol_Discovery`.
+
+## Defaults To Preserve
+
+- TLS certificate and hostname verification are enabled by default.
+- Redirects, retries, cookies, decompression, caches, proxies, SOCKS, diagnostics,
+  async execution, protocol discovery, and HTTP/3 are disabled until configured.
+- HTTPS-to-HTTP downgrade redirects are blocked by default.
+- Cross-origin credentials are stripped on redirects by default.
+- Diagnostics redact secrets by default.
+- Public-internet access is not required for the default test suite.
+- The library must not silently read browser profiles, OS credential stores,
+  password managers, or host proxy settings.
+
+## Validation
+
+Toolchain rule: every active manifest pins `gnat_native = "=15.2.1"`. Do not
+run plain system GNAT/GPR tools; use `alr exec -- ...` and require
+`alr exec -- gnatls --version` to report `GNATLS 15.x`.
+
+Typical local validation:
+
+```sh
+alr exec -- gnatls --version
+alr exec -- gprbuild -P httpclient.gpr
+alr exec -- gprbuild -P examples/examples.gpr
+alr exec -- gprbuild -P tests/tests.gpr
+./tests/bin/tests
+alr exec -- gprbuild -P tests/api_stability/api_stability.gpr
+```
+
+Release-surface and corpus validation:
+
+```sh
+alr exec -- gprbuild -P tools/tools.gpr
+./tools/bin/check_release_surface
+./tools/bin/check_aunit_suite
+./tools/bin/check_security_corpus
+./tools/bin/check_git_smart_http_release
+```
+
+Optional coverage gate when GNAT/gcov tooling is available:
+
+```sh
+cd tests && alr exec -- ../tools/bin/run_aunit_coverage
+```
+
+## Documentation Map
+
+Start with `README.md`, then `docs/DOCUMENTATION_INDEX.md`. Key focused docs:
+
+- `docs/QUICKSTART.md`: first build/test and first request
+- `docs/EXAMPLES.md`: compile-checked examples
+- `docs/CONFIGURATION.md`: option model and defaults
+- `docs/SECURITY_MODEL.md`: security boundaries and non-goals
+- `docs/DEFAULT_LIMITS.md`: documented release limits
+- `docs/THREADING_AND_OWNERSHIP.md`: ownership and task-safety
+- `docs/STATUS_MODEL.md`: result-status model
+- `docs/HTTP2_GUIDE.md`: HTTP/2 guidance
+- `docs/HTTP3_EXPERIMENTAL.md`: HTTP/3/QUIC boundaries
+- `docs/RELEASE_CHECKLIST.md`: final release gate list
+
+## Non-Goals
+
+This is not a browser networking stack. Do not add implicit PAC/WPAD/browser
+proxy discovery, browser profile import, browser cache integration, service
+workers, automatic login/OAuth/OIDC/SAML flows, NTLM/Negotiate/Kerberos, OS
+credential stores, password-manager integration, SOCKS UDP/BIND, MASQUE,
+CONNECT-UDP, WebTransport, Tor control behavior, or hidden browser-like policy
+unless a future explicit compatibility review adds such scope.

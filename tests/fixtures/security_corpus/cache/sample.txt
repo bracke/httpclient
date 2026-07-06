@@ -1,0 +1,3 @@
+Cache-Control: no-store
+Vary: authorization
+ETag: "opaque-test-token"

@@ -1,0 +1,17 @@
+# API stability notes
+
+This document identifies the intended 1.0 public surface. Ordinary users should start with `Http_Client.Clients`, `Http_Client.URI`, `Http_Client.Headers`, `Http_Client.Requests`, `Http_Client.Responses`, `Http_Client.Response_Streams`, `Http_Client.Request_Bodies`, `Http_Client.Multipart`, `Http_Client.Auth`, `Http_Client.Auth.Bearer`, `Http_Client.Auth.Digest`, `Http_Client.Cookies`, `Http_Client.Decompression`, `Http_Client.Proxies`, `Http_Client.Proxies.SOCKS`, `Http_Client.Retry`, `Http_Client.Cache`, `Http_Client.Cache.Persistent`, `Http_Client.Diagnostics`, `Http_Client.Connection_Pools`, `Http_Client.Transports.TCP`, `Http_Client.Transports.TLS`, `Http_Client.TLS.Client_Certificates`, `Http_Client.HTTP1`, `Http_Client.HTTP2`, and `Http_Client.Async`, `Http_Client.Alt_Svc`, `Http_Client.DNS_SVCB`, `Http_Client.HTTPS_Records`, `Http_Client.Protocol_Discovery`, `Http_Client.Proxy_Discovery`, and `Http_Client.Resources`.
+
+`Http_Client.HTTP3`, `Http_Client.HTTP3.*` including `Http_Client.HTTP3.Body_Streams`, and `Http_Client.QUIC` are experimental foundation packages. They are useful for validating public configuration, frame, stream, mapping, and fallback boundaries, but they do not provide a built-in QUIC/TLS network stack. `Http_Client.HTTP3.Execution` is an explicit buffered execution boundary and returns deterministic unsupported statuses unless a production HTTP/3 backend callback is deliberately supplied.
+
+Implementation-detail packages and C bridge files are not part of the compatibility promise. Public use should not depend on OpenSSL bridge symbols, `Http_Client.Crypto`, `Http_Client.TLS`, `Http_Client.HTTP2_Execution_Common`, `Http_Client.Response_Streams.HTTP2_IO`, Ada Zlib adapter internals in `Http_Client.Zlib_Decompression`, encrypted-cache primitive internals, HPACK/QPACK implementation details beyond their documented package APIs, cache file internals, test fixtures, or worker internals.
+
+After 1.0, incompatible changes to stable packages should either be avoided, guarded with deprecated compatibility shims where practical, or described in release notes. Program control should use `Http_Client.Errors.Result_Status`, `Http_Client.Cancellation` tokens, and structured result records, not diagnostic message text. `Http_Client.Errors.Category` is stable for coarse diagnostics and metrics grouping, but precise behavior should continue to match precise statuses.
+
+## Documentation-completeness note
+
+Every `.ads` package in `src/` is classified in `docs/RELEASE_SURFACE_MANIFEST.md`. Packages that are compile-visible but not intended for ordinary callers are still documented as experimental or implementation-boundary units rather than omitted.
+
+## Complete source package coverage
+
+The release surface audit also covers the following low-level and private source package names, which are classified in `RELEASE_SURFACE_MANIFEST.md` and must not disappear accidentally: `Http_Client.Types`, `Http_Client.Auth.Scopes`, `Http_Client.HTTP1.Reader`, `Http_Client.HTTP2.Connection`, `Http_Client.HTTP2_Execution_Common`, `Http_Client.HTTP2.Frames`, `Http_Client.HTTP2.HPACK`, `Http_Client.HTTP2.Mapping`, `Http_Client.HTTP2.Settings`, `Http_Client.HTTP2.Single_Stream`, `Http_Client.HTTP2.Streams`, `Http_Client.HTTP2.Body_Streams`, `Http_Client.HTTP2.Uploads`, `Http_Client.Response_Streams.HTTP2_IO`, `Http_Client.HTTP3.Frames`, `Http_Client.HTTP3.Mapping`, `Http_Client.HTTP3.QPACK`, `Http_Client.HTTP3.Settings`, `Http_Client.HTTP3.Streams`, and `Http_Client.Transports.SOCKS`.

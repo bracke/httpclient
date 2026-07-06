@@ -1,0 +1,3 @@
+gzip-header-truncated
+zlib-invalid-checksum
+raw-deflate-invalid-block

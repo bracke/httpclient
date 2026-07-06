@@ -1,0 +1,3 @@
+udp-required
+tls13-handshake-boundary
+zero-rtt-disabled

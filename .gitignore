@@ -1,0 +1,54 @@
+# Ada/GNAT build outputs
+obj/
+lib/
+bin/
+config/
+*/obj/
+*/lib/
+*/bin/
+*/config/
+*/*/obj/
+*/*/lib/
+*/*/bin/
+*/*/config/
+*.ali
+*.o
+*.so
+*.a
+*.exe
+b__*.adb
+b__*.ads
+*.bexch
+*.lexch
+*.stdout
+*.stderr
+*.cswi
+
+# Alire/local build state
+alire/
+*/alire/
+*/*/alire/
+
+# Test and example runtime artifacts
+.http-cache/
+.http-cache-encrypted/
+.api-stability-cache/
+coverage/
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+
+# Local credentials and generated secrets
+*.local.pem
+*.local.key
+*.local.p12
+.env
+interop.env
+# Proof/session/editor scratch artifacts
+obj/gnatprove/
+*/obj/gnatprove/
+*.bak
+*.tmp
+*.swp
+*.kate-swp

@@ -1,0 +1,83 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux-offline:
+    name: Linux offline build/test/package validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ada toolchain and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnat gprbuild gnatprove libssl-dev python3 || sudo apt-get install -y gnat gprbuild libssl-dev python3
+          sudo apt-get install -y libaunit-dev || sudo apt-get install -y libaunit22-dev || sudo apt-get install -y libaunit24-dev
+      - name: Build library
+        run: gprbuild -P httpclient.gpr
+      - name: Run GNATprove
+        run: gnatprove -P httpclient.gpr --level=4
+      - name: Build tests
+        run: gprbuild -P tests/tests.gpr
+      - name: Run offline tests
+        run: ./tests/bin/tests
+      - name: Compile examples
+        run: gprbuild -P examples/examples.gpr
+      - name: Compile API stability smoke
+        run: gprbuild -P tests/api_stability/api_stability.gpr
+      - name: Compile release tools
+        run: gprbuild -P tools/tools.gpr
+      - name: Run release surface checks
+        run: ./tools/bin/check_release_surface
+      - name: Run AUnit suite registration checks
+        run: ./tools/bin/check_aunit_suite
+      - name: Run security corpus checks
+        run: ./tools/bin/check_security_corpus
+      - name: Run Git smart HTTP release guard
+        run: ./tools/bin/check_git_smart_http_release
+
+  linux-release-build:
+    name: Linux release-profile smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ada toolchain and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnat gprbuild libssl-dev
+          sudo apt-get install -y libaunit-dev || sudo apt-get install -y libaunit22-dev || sudo apt-get install -y libaunit24-dev
+      - name: Build library optimized
+        run: gprbuild -P httpclient.gpr -cargs:Ada -O2 -gnat2022 -gnatW8 -largs -lssl -lcrypto
+
+  macos-build:
+    name: macOS best-effort compile
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install gnat gprbuild openssl@3 || true
+      - name: Build library when toolchain is available
+        run: |
+          if command -v gprbuild >/dev/null 2>&1; then
+            gprbuild -P httpclient.gpr || exit 1
+          else
+            echo "gprbuild unavailable on this runner; best-effort job skipped"
+          fi
+
+  windows-build:
+    name: Windows best-effort compile
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report best-effort status
+        shell: pwsh
+        run: |
+          Write-Host "Install a GNAT/GPRbuild/OpenSSL/Ada Zlib toolchain here when the Windows dependency layout is finalized."
+          Write-Host "This job documents the matrix slot and remains non-blocking until validated."

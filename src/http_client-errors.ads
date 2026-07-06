@@ -1,0 +1,207 @@
+package Http_Client.Errors
+  with SPARK_Mode => On
+is
+   --  Release surface: stable public API for 1.0.0.
+   --  Source compatibility for documented public declarations in this
+   --  package is covered by docs/compatibility.md unless a declaration
+   --  is explicitly marked experimental or implementation-only below.
+   pragma Pure;
+
+   --  Shared result/status model for Http_Client operations.
+   --
+   --  The values remain intentionally broad. Package-specific APIs return
+   --  these statuses for ordinary validation failures instead of relying on
+   --  uncaught exceptions.
+
+   type Result_Status is
+     (Ok,
+      Invalid_URI,
+      Invalid_Header,
+      Invalid_Request,
+      Connection_Failed,
+      DNS_Failed,
+      Not_Connected,
+      Write_Failed,
+      Read_Failed,
+      End_Of_Stream,
+      Incomplete_Message,
+      TLS_Failed,
+      Certificate_Verification_Failed,
+      Hostname_Verification_Failed,
+      TLS_Handshake_Failed,
+      CA_Store_Failed,
+      TLS_Client_Certificate_Load_Failed,
+      TLS_Client_Key_Load_Failed,
+      TLS_Client_Key_Mismatch,
+      TLS_Client_Key_Passphrase_Required,
+      TLS_Client_Key_Passphrase_Invalid,
+      TLS_Client_Certificate_Unsupported,
+      TLS_Client_Certificate_Rejected,
+      TLS_Client_Certificate_Scope_Mismatch,
+      TLS_Client_Certificate_Configuration_Invalid,
+      Timeout,
+      Cancelled,
+      Response_Too_Large,
+      Integrity_Check_Failed,
+      Header_Too_Large,
+      Too_Many_Redirects,
+      Invalid_Redirect,
+      Invalid_Cookie,
+      Cookie_Rejected,
+      Cookie_Too_Large,
+      Unsupported_Content_Encoding,
+      Decompression_Failed,
+      Decoded_Body_Too_Large,
+      Invalid_Proxy,
+      Proxy_Unsupported,
+      Proxy_Connection_Failed,
+      Proxy_Tunnel_Failed,
+      Proxy_Authentication_Required,
+      Invalid_SOCKS_Proxy,
+      SOCKS_Unsupported_Version,
+      SOCKS_Unsupported_Authentication_Method,
+      SOCKS_Authentication_Failed,
+      SOCKS_Connect_Failed,
+      SOCKS_General_Server_Failure,
+      SOCKS_Connection_Not_Allowed,
+      SOCKS_TTL_Expired,
+      SOCKS_Command_Unsupported,
+      SOCKS_Malformed_Reply,
+      SOCKS_Address_Type_Unsupported,
+      SOCKS_Reply_Connection_Refused,
+      SOCKS_Reply_Network_Unreachable,
+      SOCKS_Reply_Host_Unreachable,
+      Invalid_Credentials,
+      Unsupported_Authentication_Scheme,
+      Authentication_Required,
+      Authentication_Failed,
+      Authentication_Replay_Disallowed,
+      Authentication_Challenge_Malformed,
+      Authentication_Scope_Mismatch,
+      Digest_Algorithm_Unsupported,
+      Digest_QOP_Unsupported,
+      Digest_Nonce_Stale,
+      Authentication_Loop_Detected,
+      Invalid_Configuration,
+      Client_Not_Initialized,
+      Retry_Disallowed,
+      Retry_Body_Not_Replayable,
+      Body_Not_Replayable,
+      Body_Length_Mismatch,
+      Body_Producer_Failed,
+      Upload_Too_Large,
+      Chunked_Upload_Unsupported,
+      Invalid_Multipart_Boundary,
+      Invalid_Form_Field,
+      Invalid_File_Name,
+      Multipart_Too_Large,
+      Too_Many_Parts,
+      Part_Length_Unknown,
+      Part_Producer_Failed,
+      Cache_Miss,
+      Cache_Entry_Stale,
+      Cache_Revalidation_Failed,
+      Cache_Entry_Too_Large,
+      Cache_Disabled,
+      Invalid_Cache_Metadata,
+      Cache_Open_Failed,
+      Cache_Read_Failed,
+      Cache_Write_Failed,
+      Cache_Corrupt_Entry,
+      Cache_Format_Unsupported,
+      Cache_Limit_Exceeded,
+      Cache_Storage_Unavailable,
+      Cache_Encryption_Failed,
+      Cache_Decryption_Failed,
+      Cache_Authentication_Failed,
+      Cache_Key_Invalid,
+      Cache_KDF_Failed,
+      Cache_Random_Failed,
+      Cache_Encrypted_Format_Unsupported,
+      Cache_Wrong_Key,
+      HTTP2_Protocol_Error,
+      HTTP2_Frame_Error,
+      HTTP2_Compression_Error,
+      HTTP2_Flow_Control_Error,
+      HTTP2_Settings_Error,
+      HTTP2_Header_Error,
+      HTTP2_Stream_Reset,
+      HTTP2_Stream_Refused,
+      HTTP2_Stream_Limit_Reached,
+      HTTP2_Stream_State_Error,
+      HTTP2_Connection_Goaway,
+      HTTP2_Header_Block_Interleaving_Error,
+      HTTP2_Multiplexing_Unsupported,
+      HTTP2_Unsupported_Feature,
+      HTTP3_Unsupported,
+      HTTP3_Frame_Error,
+      HTTP3_Settings_Error,
+      HTTP3_QPACK_Error,
+      HTTP3_Stream_Error,
+      HTTP3_Goaway,
+      HTTP3_Protocol_Error,
+      QUIC_Unsupported,
+      QUIC_Connection_Failed,
+      QUIC_Handshake_Failed,
+      QUIC_Transport_Error,
+      HTTP3_Proxy_Unsupported,
+      HTTP3_Fallback_Disallowed,
+      ALPN_Negotiation_Failed,
+      HPACK_Decode_Failed,
+      HPACK_Huffman_Error,
+      Pool_Closed,
+      Pool_Exhausted,
+      Connection_Not_Reusable,
+      Stale_Connection,
+      Redirect_Downgrade_Blocked,
+      Redirect_Body_Replay_Disallowed,
+      Protocol_Error,
+      Unsupported_Feature,
+      Async_Queue_Full,
+      Async_Cancelled,
+      Async_Shutdown,
+      Async_Not_Ready,
+      Async_Result_Already_Taken,
+      Async_Handle_Invalid,
+      Async_Worker_Failed,
+      Async_Unsupported_Mode,
+      Internal_Error);
+   --  Coarse result status for library operations. Program control should
+   --  use these values and structured result records, not diagnostic text.
+
+   type Result_Category is
+     (Success_Category,
+      Validation_Category,
+      Request_Category,
+      Transport_Category,
+      TLS_Category,
+      Proxy_Category,
+      Authentication_Category,
+      Configuration_Category,
+      Retry_Redirect_Category,
+      Body_Category,
+      Cache_Category,
+      HTTP2_Category,
+      HTTP3_Category,
+      Pool_Category,
+      Protocol_Category,
+      Async_Category,
+      Internal_Category);
+   --  Stable high-level grouping for Result_Status values.
+   --
+   --  Category is intended for logging, metrics, diagnostics aggregation, and
+   --  coarse recovery policy. It is not a substitute for matching the precise
+   --  Result_Status when behavior depends on a documented status.
+
+   function Category (Value : Result_Status) return Result_Category;
+   --  GNATdoc contract.
+   --  @param Value Subprogram parameter.
+   --  @return Subprogram result.
+   --  Return the high-level category for Value.
+
+   function Is_Success (Value : Result_Status) return Boolean;
+   --  GNATdoc contract.
+   --  @param Value Subprogram parameter.
+   --  @return Subprogram result.
+   --  Return True only when Value is Ok.
+end Http_Client.Errors;

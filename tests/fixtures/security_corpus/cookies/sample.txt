@@ -1,0 +1,2 @@
+Set-Cookie: sid=abc; HttpOnly
+Set-Cookie: bad=value\r\nInjected: x

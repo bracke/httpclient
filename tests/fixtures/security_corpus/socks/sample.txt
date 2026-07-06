@@ -1,0 +1,3 @@
+socks5-noauth
+socks5-username-password
+connect-reply-host-unreachable
