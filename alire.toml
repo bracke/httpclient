@@ -2,7 +2,7 @@ name = "httpclient"
 description = "HTTP/HTTPS client library"
 version = "1.0.0"
 licenses = "MIT"
-
+website = "https://github.com/bracke/webframework"
 authors = ["Bent Bracke"]
 maintainers = ["Bent Bracke <bent@bracke.dk>"]
 maintainers-logins = ["bracke"]
