@@ -10,65 +10,131 @@ jobs:
     name: Linux offline build/test/package validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Ada toolchain and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gnat gprbuild gnatprove libssl-dev python3 || sudo apt-get install -y gnat gprbuild libssl-dev python3
-          sudo apt-get install -y libaunit-dev || sudo apt-get install -y libaunit22-dev || sudo apt-get install -y libaunit24-dev
+      # httpclient withs zlib, zlib withs cryptolib, and tools/tools.gpr reaches into
+      # project_tools directly -- all pinned to sibling paths, so all must sit alongside.
+      - name: Check out httpclient
+        uses: actions/checkout@v4
+        with:
+          path: httpclient
+      - name: Check out zlib sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/zlib
+          path: zlib
+      - name: Check out cryptolib sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/cryptolib
+          path: cryptolib
+      - name: Check out project_tools sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/project_tools
+          path: project_tools
+      - name: Set up Alire
+        uses: alire-project/setup-alire@v5
+        with:
+          # gnatprove from Alire's toolchain: Ubuntu has no reliable gnatprove package,
+          # which is why the previous apt-based job failed at install time.
+          toolchain: gnat_native=15.2.1 gnatprove gprbuild
+      - name: Install OpenSSL headers
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev
+      - name: Generate project_tools config
+        # tools/tools.gpr withs project_tools.gpr, whose gitignored config is only produced
+        # by building project_tools. It is not an Alire dependency of httpclient, so nothing
+        # else generates it.
+        working-directory: project_tools
+        run: alr --non-interactive build
       - name: Build library
-        run: gprbuild -P httpclient.gpr
+        # Also generates the gitignored Alire configs for zlib and cryptolib via the path pins.
+        working-directory: httpclient
+        run: alr --non-interactive build
       - name: Run GNATprove
-        run: gnatprove -P httpclient.gpr --level=4
+        working-directory: httpclient
+        run: alr exec -- gnatprove -P httpclient.gpr --level=4
       - name: Build tests
-        run: gprbuild -P tests/tests.gpr
+        # tests is its own Alire root (it depends on aunit), so it builds from there.
+        working-directory: httpclient/tests
+        run: alr --non-interactive build
       - name: Run offline tests
+        working-directory: httpclient
         run: ./tests/bin/tests
       - name: Compile examples
-        run: gprbuild -P examples/examples.gpr
+        working-directory: httpclient/examples
+        run: alr --non-interactive build
       - name: Compile API stability smoke
-        run: gprbuild -P tests/api_stability/api_stability.gpr
+        working-directory: httpclient
+        run: alr exec -- gprbuild -P tests/api_stability/api_stability.gpr
       - name: Compile release tools
-        run: gprbuild -P tools/tools.gpr
+        working-directory: httpclient
+        run: alr exec -- gprbuild -P tools/tools.gpr
       - name: Run release surface checks
+        working-directory: httpclient
         run: ./tools/bin/check_release_surface
       - name: Run AUnit suite registration checks
+        working-directory: httpclient
         run: ./tools/bin/check_aunit_suite
       - name: Run security corpus checks
+        working-directory: httpclient
         run: ./tools/bin/check_security_corpus
       - name: Run Git smart HTTP release guard
+        working-directory: httpclient
         run: ./tools/bin/check_git_smart_http_release
 
   linux-release-build:
     name: Linux release-profile smoke
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Ada toolchain and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gnat gprbuild libssl-dev
-          sudo apt-get install -y libaunit-dev || sudo apt-get install -y libaunit22-dev || sudo apt-get install -y libaunit24-dev
+      - name: Check out httpclient
+        uses: actions/checkout@v4
+        with:
+          path: httpclient
+      - name: Check out zlib sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/zlib
+          path: zlib
+      - name: Check out cryptolib sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/cryptolib
+          path: cryptolib
+      - name: Set up Alire
+        uses: alire-project/setup-alire@v5
+        with:
+          toolchain: gnat_native=15.2.1 gprbuild
+      - name: Install OpenSSL headers
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev
       - name: Build library optimized
-        run: gprbuild -P httpclient.gpr -cargs:Ada -O2 -gnat2022 -gnatW8 -largs -lssl -lcrypto
+        working-directory: httpclient
+        run: alr --non-interactive build --release
 
   macos-build:
     name: macOS best-effort compile
     runs-on: macos-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          brew update
-          brew install gnat gprbuild openssl@3 || true
-      - name: Build library when toolchain is available
-        run: |
-          if command -v gprbuild >/dev/null 2>&1; then
-            gprbuild -P httpclient.gpr || exit 1
-          else
-            echo "gprbuild unavailable on this runner; best-effort job skipped"
-          fi
+      - name: Check out httpclient
+        uses: actions/checkout@v4
+        with:
+          path: httpclient
+      - name: Check out zlib sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/zlib
+          path: zlib
+      - name: Check out cryptolib sibling
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/cryptolib
+          path: cryptolib
+      - name: Set up Alire
+        uses: alire-project/setup-alire@v5
+        with:
+          toolchain: gnat_native=15.2.1 gprbuild
+      - name: Build library
+        working-directory: httpclient
+        run: alr --non-interactive build
 
   windows-build:
     name: Windows best-effort compile
