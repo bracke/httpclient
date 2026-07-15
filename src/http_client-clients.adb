@@ -6387,54 +6387,38 @@ package body Http_Client.Clients is
          return Http_Client.Errors.Write_Failed;
    end Ensure_Parent_Directory;
 
-   function C_Open (Path : C_Strings.chars_ptr; Flags : C.int) return C.int
-     with Import, Convention => C, External_Name => "open";
+   --  The durability primitive lives in a C bridge now (http_client_fsync_bridge.c). It was
+   --  open()/fsync()/close() in Ada, which is POSIX and does not link on Windows -- mingw has
+   --  no fsync. The bridge does fsync on POSIX and FlushFileBuffers on Windows, and treats a
+   --  directory sync as a best-effort no-op there, which is how the caller already treats it.
+   function C_Fsync_Path (Path : C_Strings.chars_ptr; Is_Directory : C.int) return C.int
+     with Import, Convention => C, External_Name => "http_client_fsync_path";
 
-   function C_Fsync (FD : C.int) return C.int
-     with Import, Convention => C, External_Name => "fsync";
-
-   function C_Close (FD : C.int) return C.int
-     with Import, Convention => C, External_Name => "close";
-
-   O_RDONLY   : constant C.int := 0;
-   O_DIRECTORY : constant C.int := 16#10000#;
-
-   function Fsync_Open_Path (Path : String; Flags : C.int) return Boolean is
+   function Fsync_Open_Path (Path : String; Is_Directory : Boolean) return Boolean is
       use type C.int;
       use type C_Strings.chars_ptr;
       C_Path : C_Strings.chars_ptr := C_Strings.Null_Ptr;
-      FD     : C.int := -1;
-      Result : C.int := -1;
-      Closed : C.int := -1;
+      Result : C.int := 0;
    begin
       if Path'Length = 0 then
          return False;
       end if;
 
       C_Path := C_Strings.New_String (Path);
-      FD := C_Open (C_Path, Flags);
+      Result := C_Fsync_Path (C_Path, (if Is_Directory then 1 else 0));
       C_Strings.Free (C_Path);
-      if FD < 0 then
-         return False;
-      end if;
-
-      Result := C_Fsync (FD);
-      Closed := C_Close (FD);
-      return Result = 0 and then Closed = 0;
+      return Result = 1;
    exception
       when others =>
          if C_Path /= C_Strings.Null_Ptr then
             C_Strings.Free (C_Path);
-         end if;
-         if FD >= 0 then
-            Closed := C_Close (FD);
          end if;
          return False;
    end Fsync_Open_Path;
 
    function Fsync_File (Path : String) return Boolean is
    begin
-      return Fsync_Open_Path (Path, O_RDONLY);
+      return Fsync_Open_Path (Path, Is_Directory => False);
    end Fsync_File;
 
    procedure Fsync_Parent_Directory_Best_Effort (Path : String) is
@@ -6445,9 +6429,9 @@ package body Http_Client.Clients is
          return;
       end if;
 
-      Synced := Fsync_Open_Path (Parent, O_RDONLY + O_DIRECTORY);
+      Synced := Fsync_Open_Path (Parent, Is_Directory => True);
       if not Synced then
-         Synced := Fsync_Open_Path (Parent, O_RDONLY);
+         Synced := Fsync_Open_Path (Parent, Is_Directory => False);
       end if;
    exception
       when others =>
